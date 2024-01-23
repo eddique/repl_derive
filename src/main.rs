@@ -1,20 +1,9 @@
 use std::io::Write;
 
-use clap::{Parser, Subcommand, Args};
-
-const PARSER_TEMPLATE: &str = "\
-        {all-args}
-";
-
-const APPLET_TEMPLATE: &str = "\
-    {about-with-newline}\n\
-    {usage-heading}\n    {usage}\n\
-    \n\
-    {all-args}{after-help}\
-";
+use clap::{Args, Parser, Subcommand};
 
 #[derive(Debug, Parser)]
-#[command(multicall = true, help_template = PARSER_TEMPLATE)]
+#[command(multicall = true)]
 struct Cli {
     #[command(subcommand)]
     command: Commands,
@@ -22,24 +11,49 @@ struct Cli {
 
 #[derive(Debug, Subcommand)]
 enum Commands {
-    #[command(help_template = APPLET_TEMPLATE)]
     Echo(EchoArgs),
-    #[command(help_template = APPLET_TEMPLATE)]
     Ping,
-    #[command(help_template = APPLET_TEMPLATE)]
-    Quit,
+    Exit,
 }
 
 #[derive(Args, Debug)]
 pub struct EchoArgs {
     #[arg(
-        short = 't', 
-        long = "text", 
+        short = 't',
+        long = "text",
         visible_alias = "text",
         help = "The text to be echoed",
-        help_heading = "Echo"
+        help_heading = "Echo",
     )]
 	text: String,
+}
+
+fn respond(line: &str) -> Result<bool, String> {
+    let args = shlex::split(line).ok_or("error: Invalid quoting")?;
+    let cli = Cli::try_parse_from(args).map_err(|e| e.to_string())?;
+    match cli.command {
+        Commands::Echo(args) => {
+            println!("{}", args.text);
+        }
+        Commands::Ping => {
+            println!("Pong");
+        }
+        Commands::Exit => {
+            println!("Exiting ...");
+            return Ok(true);
+        }
+    }
+    Ok(false)
+}
+
+fn readline() -> Result<String, String> {
+    write!(std::io::stdout(), "$ ").map_err(|e| e.to_string())?;
+    std::io::stdout().flush().map_err(|e| e.to_string())?;
+    let mut buffer = String::new();
+    std::io::stdin()
+        .read_line(&mut buffer)
+        .map_err(|e| e.to_string())?;
+    Ok(buffer)
 }
 
 fn main() -> Result<(), String> {
@@ -49,7 +63,6 @@ fn main() -> Result<(), String> {
         if line.is_empty() {
             continue;
         }
-
         match respond(line) {
             Ok(quit) => {
                 if quit {
@@ -62,37 +75,5 @@ fn main() -> Result<(), String> {
             }
         }
     }
-
     Ok(())
-}
-
-fn respond(line: &str) -> Result<bool, String> {
-    let args = shlex::split(line).ok_or("error: Invalid quoting")?;
-    let cli = Cli::try_parse_from(args).map_err(|e| e.to_string())?;
-    match cli.command {
-        Commands::Echo(args) => {
-            write!(std::io::stdout(), "{}\n", args.text).map_err(|e| e.to_string())?;
-            std::io::stdout().flush().map_err(|e| e.to_string())?;
-        }
-        Commands::Ping => {
-            write!(std::io::stdout(), "Pong\n").map_err(|e| e.to_string())?;
-            std::io::stdout().flush().map_err(|e| e.to_string())?;
-        }
-        Commands::Quit => {
-            write!(std::io::stdout(), "Exiting ...\n").map_err(|e| e.to_string())?;
-            std::io::stdout().flush().map_err(|e| e.to_string())?;
-            return Ok(true);
-        }
-
-    }
-    Ok(false)
-}
-fn readline() -> Result<String, String> {
-    write!(std::io::stdout(), "$ ").map_err(|e| e.to_string())?;
-    std::io::stdout().flush().map_err(|e| e.to_string())?;
-    let mut buffer = String::new();
-    std::io::stdin()
-        .read_line(&mut buffer)
-        .map_err(|e| e.to_string())?;
-    Ok(buffer)
 }
