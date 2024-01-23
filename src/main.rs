@@ -1,24 +1,23 @@
-use clap::{Parser, Subcommand, Args};
 use std::io::Write;
+
+use clap::{Parser, Subcommand, Args};
 
 const PARSER_TEMPLATE: &str = "\
         {all-args}
-    ";
-    const APPLET_TEMPLATE: &str = "\
-        {about-with-newline}\n\
-        {usage-heading}\n    {usage}\n\
-        \n\
-        {all-args}{after-help}\
-    ";
+";
+
+const APPLET_TEMPLATE: &str = "\
+    {about-with-newline}\n\
+    {usage-heading}\n    {usage}\n\
+    \n\
+    {all-args}{after-help}\
+";
 
 #[derive(Debug, Parser)]
-#[command(
-    multicall = true,
-    help_template = PARSER_TEMPLATE,
-)]
+#[command(multicall = true, help_template = PARSER_TEMPLATE)]
 struct Cli {
     #[command(subcommand)]
-    command: Commands
+    command: Commands,
 }
 
 #[derive(Debug, Subcommand)]
@@ -28,20 +27,18 @@ enum Commands {
     #[command(help_template = APPLET_TEMPLATE)]
     Ping,
     #[command(help_template = APPLET_TEMPLATE)]
-    Quit
+    Quit,
 }
 
 #[derive(Args, Debug)]
 pub struct EchoArgs {
     #[arg(
-		help = "The text to be echoed",
-		help_heading = "Echo"
-	)]
-    #[arg(
-		short = 't',
-		long = "text",
-		visible_alias = "text",
-	)]
+        short = 't', 
+        long = "text", 
+        visible_alias = "text",
+        help = "The text to be echoed",
+        help_heading = "Echo"
+    )]
 	text: String,
 }
 

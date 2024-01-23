@@ -1,19 +1,19 @@
-# repl_derive
-An example repl utilizing the Clap derive API
+**This requires enabling the [`derive` feature flag][crate::_features].**
 
-# Usage
-
-- Echos the provided text argument
+Echo
 ```sh
 $ echo -t 'Hello, world!'
+Hello, world!
 ```
 
-- Returns a response of "Pong"
+Ping
 ```sh
 $ ping
+pong
 ```
 
-- Quits the repl
+Quit
 ```sh
 $ quit
+Exiting ...
 ```
