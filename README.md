@@ -1,19 +1,19 @@
 **This requires enabling the [`derive` feature flag][crate::_features].**
 
 Echo
-```sh
+```console
 $ echo -t 'Hello, world!'
 Hello, world!
 ```
 
 Ping
-```sh
+```console
 $ ping
 pong
 ```
 
 Quit
-```sh
+```console
 $ quit
 Exiting ...
 ```
